@@ -4,6 +4,11 @@ var bcrypt = require('bcrypt');
 var saltRounds = 10;
 const {ObjectId} = require('mongodb');
 
+var ResponseType = {
+  INVALID_USERNAME: 0,
+  INVALID_PASSWORD: 1,
+  SUCCESS: 2
+};
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
@@ -50,7 +55,7 @@ router.post('/signup', async function(req, res, next){
     console.error('Error during signup:', error);
     res.status(500).json({ message: 'Internet Server Error'});
   }
-  
+});
   // 로그인 기능
   router.post('/signin', async function(req, res, next) {
   try {
@@ -74,12 +79,14 @@ router.post('/signup', async function(req, res, next){
         req.session.userId = existingUser._id.toString();
         req.session.username = existingUser.username;
         req.session.nickname = existingUser.nickname;
-        res.json({ message: 'Login successful.'});
-      }
-      else{
-        res.status(401).json({ message: 'User not found.'});
+        res.json({ result: ResponseType.SUCCESS});
+      }else {
+        res.status(401).json({ result: ResponseType.INVALID_PASSWORD });
       }
     }
+      else{
+        res.status(401).json({ result: ResponseType.INVALID_USERNAME});
+      }
 
 
   } 
@@ -87,7 +94,5 @@ router.post('/signup', async function(req, res, next){
     console.error('Error during signin:', error);
     res.status(500).json({ message: 'Internal server error.' });
   }
-});
-
 });
 module.exports = router;
